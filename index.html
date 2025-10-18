@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Approval Prediction System - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <meta name="theme-color" content="#667eea">
+    <style>
+        :root {
+            --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bg-secondary: rgba(255, 255, 255, 0.95);
+            --text-primary: #333;
+            --text-secondary: #64748b;
+            --border-color: rgba(255, 255, 255, 0.2);
+            --shadow-light: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        [data-theme="dark"] {
+            --bg-primary: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            --bg-secondary: rgba(30, 30, 30, 0.95);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow-light: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        body {
+            background: var(--bg-primary);
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            overflow-x: hidden;
+            color: var(--text-primary);
+        }
+        
+        * {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Dark Mode Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 0.5rem;
+            box-shadow: var(--shadow-light);
+            backdrop-filter: blur(10px);
+        }
+        
+        .theme-toggle button {
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggle button:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: scale(1.1);
+        }
+        
+        .main-container {
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            box-shadow: var(--shadow-light);
+            margin: 1rem;
+            padding: 1rem;
+            max-width: 1400px;
+        }
+        
+        @media (min-width: 768px) {
+            .main-container {
+                margin: 2rem auto;
+                padding: 2rem;
+            }
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+        }
+        
+        .header h1 {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stats-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .stats-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .stats-label {
+            color: #64748b;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .chart-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .chart-container:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .chart-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .nav-tabs {
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 2rem;
+        }
+        
+        .nav-tabs .nav-link {
+            border: none;
+            color: #666;
+            font-weight: 600;
+            padding: 1rem 2rem;
+            border-radius: 10px 10px 0 0;
+            margin-right: 0.5rem;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .btn-predict {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .btn-predict:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .result-container {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+        }
+        
+        .result-approved {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+        
+        .result-rejected {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            color: white;
+        }
+        
+        .result-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .probability-bar {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            height: 20px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+        
+        .probability-fill {
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 1rem;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .insight-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .insight-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .insight-text {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        
+        /* Loading Skeleton Animation */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* Improved Form Styling */
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        /* Pulse Animation for Stats */
+        .stats-number {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        /* Modern Button Hover Effects */
+        .btn-predict:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-predict:active {
+            transform: translateY(-1px);
+        }
+        
+        /* Mobile Responsive Design */
+        @media (max-width: 767px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .stats-card {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .stats-number {
+                font-size: 1.8rem;
+            }
+            
+            .nav-tabs .nav-link {
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+            }
+            
+            .chart-container {
+                padding: 1rem;
+            }
+            
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+            }
+        }
+        
+        /* Notification System */
+        .notification-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1050;
+            max-width: 350px;
+        }
+        
+        .notification {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            box-shadow: var(--shadow-light);
+            backdrop-filter: blur(10px);
+            transform: translateX(400px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .notification.success {
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .notification.error {
+            border-left: 4px solid #f44336;
+        }
+        
+        .notification.info {
+            border-left: 4px solid #2196F3;
+        }
+        
+    </style>
+</head>
+<body>
+    <!-- Dark Mode Toggle -->
+    <div class="theme-toggle">
+        <button onclick="toggleTheme()" title="Toggle Dark Mode">
+            <i class="fas fa-moon" id="themeIcon"></i>
+        </button>
+    </div>
+    
+    <!-- Notification Container -->
+    <div class="notification-container" id="notificationContainer"></div>
+    
+    <div class="container-fluid">
+        <div class="main-container">
+            
+            <!-- Header -->
+            <div class="header">
+                <h1><i class="fas fa-chart-line"></i> Loan Approval Prediction System</h1>
+                <p>Advanced Analytics Dashboard with Real-time Insights</p>
+            </div>
+            
+            <!-- Navigation Tabs -->
+            <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="predict-tab" data-bs-toggle="tab" data-bs-target="#predict" type="button" role="tab">
+                        <i class="fas fa-calculator"></i> Predict Loan
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" type="button" role="tab">
+                        <i class="fas fa-chart-bar"></i> Analytics
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="insights-tab" data-bs-toggle="tab" data-bs-target="#insights" type="button" role="tab">
+                        <i class="fas fa-lightbulb"></i> Insights
+                    </button>
+                </li>
+            </ul>
+            
+            <!-- Tab Content -->
+            <div class="tab-content" id="mainTabsContent">
+                <!-- Dashboard Tab -->
+                <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+                    <!-- Statistics Cards -->
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="stats-card text-center">
+                                <div class="stats-icon text-success">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="stats-number text-success" id="totalApproved">0</div>
+                                <div class="stats-label">Total Approved</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card text-center">
+                                <div class="stats-icon text-danger">
+                                    <i class="fas fa-times-circle"></i>
+                                </div>
+                                <div class="stats-number text-danger" id="totalRejected">0</div>
+                                <div class="stats-label">Total Rejected</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card text-center">
+                                <div class="stats-icon text-primary">
+                                    <i class="fas fa-percentage"></i>
+                                </div>
+                                <div class="stats-number text-primary" id="approvalRate">0%</div>
+                                <div class="stats-label">Approval Rate</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card text-center">
+                                <div class="stats-icon text-info">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="stats-number text-info" id="totalApplications">0</div>
+                                <div class="stats-label">Total Applications</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Charts Row -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <h5 class="chart-title">Loan Approval Trends</h5>
+                                <canvas id="approvalTrendChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <h5 class="chart-title">Income vs Approval Rate</h5>
+                                <canvas id="incomeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <h5 class="chart-title">Property Area Distribution</h5>
+                                <canvas id="propertyChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <h5 class="chart-title">Credit History Impact</h5>
+                                <canvas id="creditChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Predict Tab -->
+                <div class="tab-pane fade" id="predict" role="tabpanel">
+                    <form id="loanForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="gender" class="form-label">Gender</label>
+                                    <select class="form-select" id="gender" name="Gender" required>
+                                        <option value="">Select Gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="married" class="form-label">Marital Status</label>
+                                    <select class="form-select" id="married" name="Married" required>
+                                        <option value="">Select Status</option>
+                                        <option value="Yes">Married</option>
+                                        <option value="No">Single</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="dependents" class="form-label">Number of Dependents</label>
+                                    <select class="form-select" id="dependents" name="Dependents" required>
+                                        <option value="">Select Dependents</option>
+                                        <option value="0">0</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3+">3+</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="education" class="form-label">Education</label>
+                                    <select class="form-select" id="education" name="Education" required>
+                                        <option value="">Select Education</option>
+                                        <option value="Graduate">Graduate</option>
+                                        <option value="Not Graduate">Not Graduate</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="selfEmployed" class="form-label">Self Employed</label>
+                                    <select class="form-select" id="selfEmployed" name="Self_Employed" required>
+                                        <option value="">Select Status</option>
+                                        <option value="Yes">Yes</option>
+                                        <option value="No">No</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="propertyArea" class="form-label">Property Area</label>
+                                    <select class="form-select" id="propertyArea" name="Property_Area" required>
+                                        <option value="">Select Area</option>
+                                        <option value="Urban">Urban</option>
+                                        <option value="Rural">Rural</option>
+                                        <option value="Semiurban">Semiurban</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="applicantIncome" class="form-label">
+                                        <i class="fas fa-rupee-sign text-success me-2"></i>Applicant Income (₹)
+                                    </label>
+                                    <input type="number" class="form-control" id="applicantIncome" name="ApplicantIncome" 
+                                           placeholder="Enter monthly income" required min="0" 
+                                           oninput="validateIncome(this)">
+                                    <div class="invalid-feedback" id="incomeError"></div>
+                                    <small class="form-text text-muted">Monthly income in Indian Rupees</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="coapplicantIncome" class="form-label">Co-applicant Income (₹)</label>
+                                    <input type="number" class="form-control" id="coapplicantIncome" name="CoapplicantIncome" 
+                                           placeholder="Enter co-applicant income" required min="0">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="loanAmount" class="form-label">Loan Amount (₹)</label>
+                                    <input type="number" class="form-control" id="loanAmount" name="LoanAmount" 
+                                           placeholder="Enter loan amount" required min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="loanTerm" class="form-label">Loan Term (Days)</label>
+                                    <input type="number" class="form-control" id="loanTerm" name="Loan_Amount_Term" 
+                                           placeholder="Enter loan term" required min="0">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="creditHistory" class="form-label">Credit History</label>
+                            <select class="form-select" id="creditHistory" name="Credit_History" required>
+                                <option value="">Select Credit History</option>
+                                <option value="1">Good Credit History</option>
+                                <option value="0">Poor Credit History</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-predict">
+                            <i class="fas fa-search"></i> Predict Loan Approval
+                        </button>
+                    </form>
+                    
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <p>Analyzing your application...</p>
+                    </div>
+                    
+                    <div class="result-container" id="resultContainer">
+                        <div class="result-icon" id="resultIcon"></div>
+                        <h3 id="resultTitle"></h3>
+                        <p id="resultMessage"></p>
+                        <div class="probability-bar">
+                            <div class="probability-fill" id="probabilityFill"></div>
+                        </div>
+                        <p id="probabilityText"></p>
+                    </div>
+                </div>
+                
+                <!-- Analytics Tab -->
+                <div class="tab-pane fade" id="analytics" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="chart-container">
+                                <h5 class="chart-title">Detailed Analytics Dashboard</h5>
+                                <p class="text-muted mb-3">Comprehensive analysis of loan approval factors vs risk indicators</p>
+                                <canvas id="detailedAnalyticsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Analytics Summary Cards -->
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-star"></i> Top Success Factor
+                                    </h6>
+                                    <h4 id="topSuccessFactor">Credit History</h4>
+                                    <small>Most influential approval factor</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-danger text-white">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-exclamation-triangle"></i> Top Risk Factor
+                                    </h6>
+                                    <h4 id="topRiskFactor">Poor Credit</h4>
+                                    <small>Highest rejection indicator</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-chart-line"></i> Approval Trend
+                                    </h6>
+                                    <h4 id="approvalTrend">+5.2%</h4>
+                                    <small>Monthly improvement</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-users"></i> Best Segment
+                                    </h6>
+                                    <h4 id="bestSegment">Graduates</h4>
+                                    <small>Highest approval rate</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <h5 class="chart-title">Education vs Approval Rate</h5>
+                                <canvas id="educationChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <h5 class="chart-title">Marital Status Impact</h5>
+                                <canvas id="maritalChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Insights Tab -->
+                <div class="tab-pane fade" id="insights" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="insight-card">
+                                <h6 class="insight-title"><i class="fas fa-lightbulb text-warning"></i> Key Insight 1</h6>
+                                <p class="insight-text">Applicants with good credit history have 85% higher approval rates compared to those with poor credit history.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="insight-card">
+                                <h6 class="insight-title"><i class="fas fa-chart-line text-success"></i> Key Insight 2</h6>
+                                <p class="insight-text">Urban property areas show 15% higher approval rates compared to rural areas.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="insight-card">
+                                <h6 class="insight-title"><i class="fas fa-users text-info"></i> Key Insight 3</h6>
+                                <p class="insight-text">Married applicants with dependents show more stable approval patterns across different income levels.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="insight-card">
+                                <h6 class="insight-title"><i class="fas fa-graduation-cap text-primary"></i> Key Insight 4</h6>
+                                <p class="insight-text">Graduate applicants have 20% higher approval rates, especially in higher income brackets.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let charts = {};
+        let isInitialized = false;
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            if (isInitialized) return;
+            isInitialized = true;
+            
+            // Load theme first
+            loadTheme();
+            
+            initializeCharts();
+            // Add a small delay to ensure server is ready
+            setTimeout(loadDashboardData, 1000);
+            
+            // Add smooth scrolling to tabs
+            addSmoothScrolling();
+            
+            // Initialize form validation
+            initializeFormValidation();
+            
+            // Show welcome notification
+            setTimeout(() => {
+                showNotification('Welcome to Loan Approval Prediction System!', 'success');
+            }, 1000);
+        });
+        
+        // Chart initialization
+        function initializeCharts() {
+            // Destroy existing charts if they exist
+            Object.keys(charts).forEach(key => {
+                if (charts[key]) {
+                    charts[key].destroy();
+                }
+            });
+            
+            // Approval Trend Chart
+            const approvalCtx = document.getElementById('approvalTrendChart').getContext('2d');
+            charts.approvalTrend = new Chart(approvalCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Approved',
+                        data: [65, 70, 68, 75, 72, 78],
+                        borderColor: '#4CAF50',
+                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Rejected',
+                        data: [35, 30, 32, 25, 28, 22],
+                        borderColor: '#f44336',
+                        backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    }
+                }
+            });
+            
+            // Income Chart
+            const incomeCtx = document.getElementById('incomeChart').getContext('2d');
+            charts.income = new Chart(incomeCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['0-5K', '5K-10K', '10K-15K', '15K-20K', '20K+'],
+                    datasets: [{
+                        label: 'Approval Rate %',
+                        data: [45, 65, 78, 85, 92],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 205, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+            
+            // Property Chart
+            const propertyCtx = document.getElementById('propertyChart').getContext('2d');
+            charts.property = new Chart(propertyCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Urban', 'Rural', 'Semiurban'],
+                    datasets: [{
+                        data: [45, 30, 25],
+                        backgroundColor: [
+                            '#FF6384',
+                            '#36A2EB',
+                            '#FFCE56'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+            
+            // Credit Chart
+            const creditCtx = document.getElementById('creditChart').getContext('2d');
+            charts.credit = new Chart(creditCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Good Credit History', 'Poor Credit History'],
+                    datasets: [{
+                        label: 'Approval Rate %',
+                        data: [79.6, 7.9], // Will be updated with real data
+                        backgroundColor: [
+                            '#4CAF50',
+                            '#f44336'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.parsed + '% approval rate';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Education Chart
+            const educationCtx = document.getElementById('educationChart').getContext('2d');
+            charts.education = new Chart(educationCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Graduate', 'Not Graduate'],
+                    datasets: [{
+                        label: 'Approval Rate %',
+                        data: [78, 45],
+                        backgroundColor: ['#4CAF50', '#f44336']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+            
+            // Marital Chart
+            const maritalCtx = document.getElementById('maritalChart').getContext('2d');
+            charts.marital = new Chart(maritalCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Married', 'Single'],
+                    datasets: [{
+                        label: 'Approval Rate %',
+                        data: [72, 68],
+                        backgroundColor: ['#2196F3', '#FF9800']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+            
+            // Detailed Analytics Chart - Multi-dataset comparison
+            const detailedCtx = document.getElementById('detailedAnalyticsChart').getContext('2d');
+            charts.detailedAnalytics = new Chart(detailedCtx, {
+                type: 'radar',
+                data: {
+                    labels: [
+                        'Credit History Impact',
+                        'Education Level',
+                        'Income Level',
+                        'Property Area',
+                        'Marital Status',
+                        'Employment Type'
+                    ],
+                    datasets: [{
+                        label: 'Approval Factors',
+                        data: [85, 75, 80, 65, 70, 60],
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(54, 162, 235, 1)'
+                    }, {
+                        label: 'Risk Factors',
+                        data: [15, 25, 20, 35, 30, 40],
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(255, 99, 132, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.r + '%';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                stepSize: 20
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Load dashboard data
+        function loadDashboardData() {
+            fetch('http://127.0.0.1:5000/dashboard-data')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        console.error('Error loading dashboard data:', data.error);
+                        return;
+                    }
+                    
+                    // Update statistics
+                    document.getElementById('totalApproved').textContent = data.statistics.approved_count;
+                    document.getElementById('totalRejected').textContent = data.statistics.rejected_count;
+                    document.getElementById('approvalRate').textContent = data.statistics.approval_rate + '%';
+                    document.getElementById('totalApplications').textContent = data.statistics.total_applications;
+                    
+                    // Update charts with real data
+                    updateCharts(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Fallback to demo data
+                    document.getElementById('totalApproved').textContent = '422';
+                    document.getElementById('totalRejected').textContent = '192';
+                    document.getElementById('approvalRate').textContent = '68.7%';
+                    document.getElementById('totalApplications').textContent = '614';
+                });
+        }            
+        
+        // Update charts with real data
+        function updateCharts(data) {
+            // Update income chart
+            charts.income.data.datasets[0].data = data.income_analysis.approval_rates;
+            charts.income.update();
+            
+            // Update property chart
+            const propertyData = Object.values(data.property_distribution);
+            const propertyLabels = Object.keys(data.property_distribution);
+            charts.property.data.labels = propertyLabels;
+            charts.property.data.datasets[0].data = propertyData;
+            charts.property.update();
+            
+            // Update credit chart
+            charts.credit.data.datasets[0].data = [
+                data.credit_impact.good_credit_rate,
+                data.credit_impact.poor_credit_rate
+            ];
+            charts.credit.update();
+            
+            // Update education chart
+            charts.education.data.datasets[0].data = [
+                data.education_impact.graduate_rate,
+                data.education_impact.not_graduate_rate
+            ];
+            charts.education.update();
+            
+            // Update marital chart
+            charts.marital.data.datasets[0].data = [
+                data.marital_impact.married_rate,
+                data.marital_impact.single_rate
+            ];
+            charts.marital.update();
+            
+            // Update detailed analytics chart with real data
+            if (charts.detailedAnalytics) {
+                charts.detailedAnalytics.data.datasets[0].data = [
+                    data.credit_impact.good_credit_rate, // Credit History Impact
+                    data.education_impact.graduate_rate, // Education Level
+                    Math.max(...data.income_analysis.approval_rates), // Income Level (highest rate)
+                    Math.max(data.property_distribution.Urban || 0, data.property_distribution.Rural || 0, data.property_distribution.Semiurban || 0) / data.statistics.total_applications * 100, // Property Area
+                    data.marital_impact.married_rate, // Marital Status
+                    70 // Employment Type (placeholder as we don't have this data)
+                ];
+                
+                charts.detailedAnalytics.data.datasets[1].data = [
+                    data.credit_impact.poor_credit_rate, // Credit Risk
+                    data.education_impact.not_graduate_rate, // Education Risk
+                    Math.min(...data.income_analysis.approval_rates), // Income Risk (lowest rate)
+                    Math.min(data.property_distribution.Urban || 100, data.property_distribution.Rural || 100, data.property_distribution.Semiurban || 100) / data.statistics.total_applications * 100, // Property Risk
+                    data.marital_impact.single_rate, // Marital Risk
+                    30 // Employment Risk (placeholder)
+                ];
+                
+                charts.detailedAnalytics.update();
+            }
+            
+            // Update analytics summary cards
+            updateAnalyticsSummary(data);
+        }
+        
+        // Update analytics summary cards with real data
+        function updateAnalyticsSummary(data) {
+            // Determine top success factor
+            const factors = {
+                'Credit History': data.credit_impact.good_credit_rate,
+                'Education': data.education_impact.graduate_rate,
+                'Income': Math.max(...data.income_analysis.approval_rates),
+                'Marital Status': data.marital_impact.married_rate
+            };
+            
+            const topFactor = Object.keys(factors).reduce((a, b) => factors[a] > factors[b] ? a : b);
+            document.getElementById('topSuccessFactor').textContent = topFactor;
+            
+            // Determine top risk factor
+            const risks = {
+                'Poor Credit': 100 - data.credit_impact.poor_credit_rate,
+                'No Education': 100 - data.education_impact.not_graduate_rate,
+                'Low Income': 100 - Math.min(...data.income_analysis.approval_rates),
+                'Single Status': 100 - data.marital_impact.single_rate
+            };
+            
+            const topRisk = Object.keys(risks).reduce((a, b) => risks[a] > risks[b] ? a : b);
+            document.getElementById('topRiskFactor').textContent = topRisk;
+            
+            // Update best segment
+            const bestSegment = data.education_impact.graduate_rate > data.marital_impact.married_rate ? 'Graduates' : 'Married';
+            document.getElementById('bestSegment').textContent = bestSegment;
+            
+            // Calculate approval trend (simulated improvement)
+            const currentRate = data.statistics.approval_rate;
+            const trend = (currentRate > 65) ? '+' + (currentRate - 65).toFixed(1) + '%' : (currentRate - 65).toFixed(1) + '%';
+            document.getElementById('approvalTrend').textContent = trend;
+        }
+        
+        
+        // Loan prediction form
+        document.getElementById('loanForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Convert string values to appropriate types
+            data.ApplicantIncome = parseFloat(data.ApplicantIncome);
+            data.CoapplicantIncome = parseFloat(data.CoapplicantIncome);
+            data.LoanAmount = parseFloat(data.LoanAmount);
+            data.Loan_Amount_Term = parseFloat(data.Loan_Amount_Term);
+            data.Credit_History = parseInt(data.Credit_History);
+            
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultContainer').style.display = 'none';
+            
+            try {
+                const response = await fetch('http://127.0.0.1:5000/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    displayResult(result);
+                } else {
+                    throw new Error(result.error || 'Prediction failed');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+        
+        function displayResult(result) {
+            const container = document.getElementById('resultContainer');
+            const icon = document.getElementById('resultIcon');
+            const title = document.getElementById('resultTitle');
+            const message = document.getElementById('resultMessage');
+            const fill = document.getElementById('probabilityFill');
+            const text = document.getElementById('probabilityText');
+            
+            const isApproved = result.prediction === 'Y';
+            
+            // Set container class
+            container.className = `result-container ${isApproved ? 'result-approved' : 'result-rejected'}`;
+            
+            // Set icon and text
+            if (isApproved) {
+                icon.innerHTML = '<i class="fas fa-check-circle"></i>';
+                title.textContent = 'Congratulations!';
+                message.textContent = 'Your loan application is likely to be approved.';
+            } else {
+                icon.innerHTML = '<i class="fas fa-times-circle"></i>';
+                title.textContent = 'Application Review Needed';
+                message.textContent = 'Your loan application may need additional review.';
+            }
+            
+            // Set probability
+            const approvalProb = result.probability.approved * 100;
+            fill.style.width = approvalProb + '%';
+            text.textContent = `Approval Probability: ${approvalProb.toFixed(1)}%`;
+            
+            // Show result
+            container.style.display = 'block';
+        }
+        
+        function login() {
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                
+                if (email && password) {
+                    fetch('http://127.0.0.1:5000/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email: email, password: password })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            isLoggedIn = true;
+                            document.getElementById('userName').textContent = email.split('@')[0];
+                            document.getElementById('authSection').style.display = 'none';
+                            document.getElementById('userInfo').style.display = 'block';
+                            
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+                            modal.hide();
+                            
+                            // Clear form
+                            document.getElementById('loginForm').reset();
+                            
+                            // Reload dashboard data
+                            loadDashboardData();
+                        } else {
+                            alert('Login failed: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        alert('Login error: ' + error.message);
+                    });
+                }
+            }
+            
+            function register() {
+                const name = document.getElementById('registerName').value;
+                const email = document.getElementById('registerEmail').value;
+                const password = document.getElementById('registerPassword').value;
+                
+                if (name && email && password) {
+                    fetch('http://127.0.0.1:5000/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ name: name, email: email, password: password })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Registration successful! Please login.');
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
+                            modal.hide();
+                            
+                            // Clear form
+                            document.getElementById('registerForm').reset();
+                        } else {
+                            alert('Registration failed: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        alert('Registration error: ' + error.message);
+                    });
+                }
+            }
+            
+            function logout() {
+                fetch('http://127.0.0.1:5000/logout')
+                    .then(() => {
+                        isLoggedIn = false;
+                        document.getElementById('authSection').style.display = 'block';
+                        document.getElementById('userInfo').style.display = 'none';
+                    })
+                    .catch(error => {
+                        console.error('Logout error:', error);
+                    });
+            }
+            
+            // Loan prediction form
+            document.getElementById('loanForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData.entries());
+                
+                // Convert string values to appropriate types
+                data.ApplicantIncome = parseFloat(data.ApplicantIncome);
+                data.CoapplicantIncome = parseFloat(data.CoapplicantIncome);
+                data.LoanAmount = parseFloat(data.LoanAmount);
+                data.Loan_Amount_Term = parseFloat(data.Loan_Amount_Term);
+                data.Credit_History = parseInt(data.Credit_History);
+                
+                // Show loading
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('resultContainer').style.display = 'none';
+                
+                try {
+                    const response = await fetch('http://127.0.0.1:5000/predict', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        displayResult(result);
+                    } else {
+                        throw new Error(result.error || 'Prediction failed');
+                    }
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                } finally {
+                    document.getElementById('loading').style.display = 'none';
+                }
+            });
+            
+            // Real-time form validation
+            function validateIncome(input) {
+                const value = parseFloat(input.value);
+                const errorDiv = document.getElementById('incomeError');
+                
+                if (value < 1000) {
+                    input.classList.add('is-invalid');
+                    errorDiv.textContent = 'Income should be at least ₹1,000';
+                } else if (value > 10000000) {
+                    input.classList.add('is-invalid');
+                    errorDiv.textContent = 'Income seems too high. Please verify.';
+                } else {
+                    input.classList.remove('is-invalid');
+                    input.classList.add('is-valid');
+                    errorDiv.textContent = '';
+                }
+            }
+            
+            // Initialize form validation
+            function initializeFormValidation() {
+                const form = document.getElementById('loanForm');
+                if (form) {
+                    form.addEventListener('submit', function(e) {
+                        if (!form.checkValidity()) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    });
+                }
+            }
+            
+            // Add smooth scrolling
+            function addSmoothScrolling() {
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        // Add a subtle animation when switching tabs
+                        const target = document.querySelector(this.getAttribute('data-bs-target'));
+                        if (target) {
+                            target.style.opacity = '0';
+                            setTimeout(() => {
+                                target.style.opacity = '1';
+                            }, 150);
+                        }
+                    });
+                });
+            }
+            
+            // Enhanced chart animations
+            Chart.defaults.animation.duration = 2000;
+            Chart.defaults.animation.easing = 'easeInOutQuart';
+            
+            // Dark Mode Toggle
+            function toggleTheme() {
+                const body = document.body;
+                const themeIcon = document.getElementById('themeIcon');
+                
+                if (body.getAttribute('data-theme') === 'dark') {
+                    body.removeAttribute('data-theme');
+                    themeIcon.className = 'fas fa-moon';
+                    localStorage.setItem('theme', 'light');
+                    showNotification('Light mode activated', 'info');
+                } else {
+                    body.setAttribute('data-theme', 'dark');
+                    themeIcon.className = 'fas fa-sun';
+                    localStorage.setItem('theme', 'dark');
+                    showNotification('Dark mode activated', 'info');
+                }
+            }
+            
+            // Load saved theme
+            function loadTheme() {
+                const savedTheme = localStorage.getItem('theme');
+                const themeIcon = document.getElementById('themeIcon');
+                
+                if (savedTheme === 'dark') {
+                    document.body.setAttribute('data-theme', 'dark');
+                    themeIcon.className = 'fas fa-sun';
+                }
+            }
+            
+            // Notification System
+            function showNotification(message, type = 'info', duration = 3000) {
+                const container = document.getElementById('notificationContainer');
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>${message}</span>
+                        <button type="button" class="btn-close btn-close-white ms-2" onclick="this.parentElement.parentElement.remove()"></button>
+                    </div>
+                `;
+                
+                container.appendChild(notification);
+                
+                // Show notification
+                setTimeout(() => notification.classList.add('show'), 100);
+                
+                // Auto remove
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => notification.remove(), 300);
+                }, duration);
+            }
+            
+            
+            
+    </script>
+</body>
+</html>
