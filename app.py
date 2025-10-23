@@ -13,8 +13,14 @@ from datetime import datetime
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here-change-in-production'
 
-# Enable CORS for all routes
-CORS(app)
+# Enable CORS for all routes with explicit configuration
+CORS(app, resources={
+    r"/*": {
+        "origins": ["*"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 
 # Global variables for model and encoders
 model = None
@@ -150,9 +156,16 @@ def home():
     return send_from_directory('.', 'index.html')
 
 
-@app.route('/dashboard-data')
+@app.route('/dashboard-data', methods=['GET', 'OPTIONS'])
 def dashboard_data():
     """Get dashboard analytics data"""
+    # Handle preflight OPTIONS request
+    if request.method == 'OPTIONS':
+        response = jsonify({'status': 'ok'})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+        return response
     global df_original
     
     if df_original is None:
@@ -235,9 +248,17 @@ def dashboard_data():
         }
     })
 
-@app.route('/predict', methods=['POST'])
+@app.route('/predict', methods=['POST', 'OPTIONS'])
 def predict():
     """API endpoint for loan prediction"""
+    # Handle preflight OPTIONS request
+    if request.method == 'OPTIONS':
+        response = jsonify({'status': 'ok'})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+        return response
+    
     try:
         data = request.get_json()
         
